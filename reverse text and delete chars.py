@@ -1,5 +1,6 @@
 # Function to process data
 import sys
+import string
 def process_data(file_path):
     # Open the file in read mode with the specified encoding
     with open(file_path, 'r', encoding='utf-8') as file:
@@ -7,19 +8,16 @@ def process_data(file_path):
         lines = file.readlines()
 
     # Given array of allowed characters
-    heb=[]
-    allowed_chars =[' ',',',':','-','.','\n','"']
-    for i in range(65,91):
-        allowed_chars.append(chr(i))
-    for i in range(97,123):
-        allowed_chars.append(chr(i))
-    a="פםןוטארקףךלחיעכגדשץתצמנהבסז"
-    for i in a:
-        heb.append(i)
-        allowed_chars.append(i)
+    allowed_chars =set([' ',',',':','-','.','\n','"'])
+    allowed_chars.update(set(string.ascii_letters))
+
+    heb="פםןוטארקףךלחיעכגדשץתצמנהבסז"
+    allowed_chars.update(set(heb))
+
     # Function to filter characters based on the given array
     def filter_chars(word):
         return ''.join(char for char in word if char in allowed_chars)
+    # Function to see if a word is in hebrew
     def containts_heb(word):
         return any(i in word for i in heb)
 
@@ -31,18 +29,19 @@ def process_data(file_path):
         # Split the line into an array of words and reverse the order of words
         reversed_words = line.split()[::-1]
 
-        # Reverse the order of characters in each word and filter based on allowed characters
+        # Reverse the order of characters in each hebrew word and filter based on allowed characters
         reversed_and_filtered_words = [(filter_chars(word[::-1])if containts_heb(word) else filter_chars(word)) for word in reversed_words ]
         for word in reversed_and_filtered_words:
+            #removes empty words
             if len(word)==0:
                 reversed_and_filtered_words.remove(word)
                 
         
 
-        # Join the reversed and filtered words back into a line and append to the main array
-        if len(reversed_and_filtered_words)==1:
+       # remove empty lines
             if len(reversed_and_filtered_words[0])==0:
                 continue
+        # Join the reversed and filtered words back into a line and append to the main array
         reversed_and_filtered_lines.append(' '.join(reversed_and_filtered_words)+'\n')
 
     # Return the processed lines
@@ -51,7 +50,7 @@ def process_data(file_path):
 
 
 file_path = sys.argv[1]
-#result = process_data(file_path)
+
 output_file_path = sys.argv[1]
 output_file_path=output_file_path[:-4] +' reversed.txt'
 
