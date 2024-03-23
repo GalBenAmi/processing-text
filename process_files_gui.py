@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
 import string
+import os
 #import PyPDF2
 #def pdf_to_text(input_pdf, output_txt):
 #    with open(input_pdf, 'rb') as file:
@@ -13,19 +14,47 @@ import string
 #    with open(output_txt, 'w', encoding='utf-8') as output_file:
 #        output_file.write(text)
 
+    
+    
 def select_file():
     global file_path
     file_path = filedialog.askopenfilename(title="Select a text file", filetypes=[("Text files", "*.txt")])
-    
+
+   
+def defult_filename():
+    name=file_name+"_Filterd by-"
+    suffix={0:"Reversed",1:"HebrewChar",2:"EnglishChar",3:"Common",4:"Custom"}
+    arr=[reverse_var.get(),hebrew_var.get(),english_var.get(),common_var.get(),custom_entry.get()]
+    for t in [i for i, x in enumerate(arr) if x]:
+        if(t==0):
+            name=file_name+"_"+suffix[t]+"_Filterd by-"
+            continue
+        name+=f" {suffix[t]}"
+    return name
+def process_file_path():
+    global file_name, file_type
+    reverse_path=file_path[::-1]
+    dot= reverse_path.index(".")
+    bSlash= reverse_path.index("/")
+    file_name = reverse_path[dot+1:bSlash]
+    file_name=file_name[::-1]
+    file_type=reverse_path[:dot]
+    file_type= file_type[::-1]
+    file_name= defult_filename()
+
 def select_output_location():
-    global save_path
-    save_path= filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt")])  
-    
+    try:file_path
+    except NameError:
+        show_error_message("Plese select file first!")
+    process_file_path()      
+    global save_path 
+    save_path= filedialog.asksaveasfilename(initialfile = file_name ,defaultextension=".txt", filetypes=[("Text files", "*.txt")])  
+
 def start_processing():
 
     if file_path:
         if save_path:
-            if english_var or hebrew_var or common_var or reverse_var or custom_entry.get():
+            if english_var.get() or hebrew_var.get() or common_var.get() or reverse_var.get() or custom_entry.get():
                 process_and_save(file_path, save_path)
                 show_done_message()
             else:
@@ -90,7 +119,8 @@ def process_and_save(input_path, output_path):
 def show_error_message(ms):
     messagebox.showinfo("ERORR", f"{ms}")
 def show_done_message():
-    messagebox.showinfo("Done", "Processing is complete!")
+    if(messagebox.askyesno("Done", "Processing is complete!\nDo you want to open the file?")):
+        os.startfile(save_path)
 
 # Create the main window
 window = tk.Tk()
